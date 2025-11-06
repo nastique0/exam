@@ -1,0 +1,1295 @@
+#pragma once
+
+struct TreeNode;
+
+struct StackNode 
+{
+    TreeNode* data;  
+    StackNode* next;
+};
+
+class Stack
+{
+private:
+    StackNode* top;
+
+public:
+    Stack();
+    ~Stack();
+    void push(TreeNode* data);
+    TreeNode* pop();
+    TreeNode* peek();
+    bool isEmpty();
+};
+#include "Stack.h"
+#include "Tree.h"
+#include <iostream>
+
+Stack::Stack() : top(NULL) {}
+
+Stack::~Stack() 
+{
+    while (!isEmpty()) 
+        pop();
+}
+
+void Stack::push(TreeNode* data)
+{
+    StackNode* newNode = new StackNode;
+    newNode->data = data;
+    newNode->next = top;
+    top = newNode;
+}
+
+TreeNode* Stack::pop() 
+{
+    if (isEmpty())
+        return NULL;
+
+    StackNode* temp = top;
+    TreeNode* data = top->data;
+    top = top->next;
+    delete temp;
+    return data;
+}
+
+TreeNode* Stack::peek()
+{
+    if (isEmpty()) 
+        return NULL;
+    
+    return top->data;
+}
+
+bool Stack::isEmpty() 
+{
+    return top == NULL;
+}
+#pragma once
+#include "Stack.h"
+#include <string>
+using namespace std;
+
+struct TreeNode
+{
+    int data;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(int data) : data(data), left(nullptr), right(nullptr) {}
+};
+
+class Tree
+{
+private:
+    TreeNode* root;
+    void clear(TreeNode* node);
+
+public:
+    Tree();
+    ~Tree();
+
+    void add(int data);
+    bool isEmpty();
+    void printRightBranch();
+
+    void depthFirstTraversal();
+    int findMinDFS();
+    int findMaxDFS();
+
+    bool createFromFile(ifstream& f1);
+};
+#include "Tree.h"
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+Tree::Tree() : root(nullptr) {}
+
+Tree::~Tree()
+{
+    clear(root);
+}
+
+void Tree::clear(TreeNode* node)
+{
+    if (node)
+    {
+        clear(node->left);
+        clear(node->right);
+        delete node;
+    }
+}
+
+
+void addToTree(TreeNode*& node, int data)
+{
+    if (!node)
+    {
+        node = new TreeNode(data);
+        return;
+    }
+
+    if (data < node->data)
+        addToTree(node->left, data);
+    else 
+        addToTree(node->right, data);
+}
+
+bool Tree::createFromFile(ifstream& f1)
+{
+    if (!f1.is_open())
+        return false;
+
+    clear(root);
+    root = nullptr;
+
+    int value;
+    int count = 0;
+
+  
+    while (f1 >> value)
+    {
+        addToTree(root, value);
+        count++;
+        cout << value << endl;
+    }
+
+    if (count == 0)
+
+        return false;
+    
+    return true;
+}
+void Tree::add(int data)
+{
+    TreeNode* newNode = new TreeNode(data);
+
+    if (!root)
+    {
+        root = newNode;
+        return;
+    }
+
+    // Находим крайний правый узел
+    TreeNode* current = root;
+    while (current->right)
+        current = current->right;
+
+    current->right = newNode;
+}
+
+void Tree::depthFirstTraversal()
+{
+    if (!root)
+        return;
+
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            cout << marker->data << " ";
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+    cout << endl;
+}
+
+int Tree::findMinDFS()
+{
+    if (!root)
+        return 0;
+
+    int minv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data < minv)
+                minv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return minv;
+}
+
+int Tree::findMaxDFS()
+{
+    if (!root)
+        return 0;
+
+    int maxv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data > maxv)
+                maxv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return maxv;
+}
+
+bool Tree::isEmpty()
+{
+    return root == nullptr;
+}
+
+void Tree::printRightBranch()
+{
+    if (!root)
+        return;
+
+    TreeNode* current = root;
+
+    while (current)
+    {
+        cout << current->data;
+        if (current->right)
+            cout << " -> ";
+
+        current = current->right;
+    }
+    cout << endl;
+}
+
+#include "Tree.h"
+#include <fstream>
+#include <iostream>
+
+int main()
+{
+    Tree tree;
+
+    ifstream file("tree_data.txt");
+
+    if (tree.createFromFile(file))
+    {
+        tree.printRightBranch();
+        cout << "Min: " << tree.findMinDFS() << endl;
+        cout << "Max: " << tree.findMaxDFS() << endl;
+    }
+
+    file.close();
+
+    tree.add(100);
+    tree.printRightBranch();
+
+    cout << endl;
+
+    return 0;
+}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#pragma once
+
+struct TreeNode;
+
+struct StackNode 
+{
+    TreeNode* data;  
+    StackNode* next;
+};
+
+class Stack
+{
+private:
+    StackNode* top;
+
+public:
+    Stack();
+    ~Stack();
+    void push(TreeNode* data);
+    TreeNode* pop();
+    TreeNode* peek();
+    bool isEmpty();
+};
+#include "Stack.h"
+#include "Tree.h"
+#include <iostream>
+
+Stack::Stack() : top(NULL) {}
+
+Stack::~Stack() 
+{
+    while (!isEmpty()) 
+        pop();
+}
+
+void Stack::push(TreeNode* data)
+{
+    StackNode* newNode = new StackNode;
+    newNode->data = data;
+    newNode->next = top;
+    top = newNode;
+}
+
+TreeNode* Stack::pop() 
+{
+    if (isEmpty())
+        return NULL;
+
+    StackNode* temp = top;
+    TreeNode* data = top->data;
+    top = top->next;
+    delete temp;
+    return data;
+}
+
+TreeNode* Stack::peek()
+{
+    if (isEmpty()) 
+        return NULL;
+    
+    return top->data;
+}
+
+bool Stack::isEmpty() 
+{
+    return top == NULL;
+}
+#pragma once
+#include "Stack.h"
+#include <string>
+using namespace std;
+
+struct TreeNode
+{
+    int data;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(int data) : data(data), left(nullptr), right(nullptr) {}
+};
+
+class Tree
+{
+private:
+    TreeNode* root;
+    void clear(TreeNode* node);
+
+public:
+    Tree();
+    ~Tree();
+
+    void add(int data);
+    bool isEmpty();
+    void printRightBranch();
+
+    void depthFirstTraversal();
+    int findMinDFS();
+    int findMaxDFS();
+
+    bool createFromFile(ifstream& f1);
+};
+#include "Tree.h"
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+Tree::Tree() : root(nullptr) {}
+
+Tree::~Tree()
+{
+    clear(root);
+}
+
+void Tree::clear(TreeNode* node)
+{
+    if (node)
+    {
+        clear(node->left);
+        clear(node->right);
+        delete node;
+    }
+}
+
+
+void addToTree(TreeNode*& node, int data)
+{
+    if (!node)
+    {
+        node = new TreeNode(data);
+        return;
+    }
+
+    if (data < node->data)
+        addToTree(node->left, data);
+    else 
+        addToTree(node->right, data);
+}
+
+bool Tree::createFromFile(ifstream& f1)
+{
+    if (!f1.is_open())
+        return false;
+
+    clear(root);
+    root = nullptr;
+
+    int value;
+    int count = 0;
+
+  
+    while (f1 >> value)
+    {
+        addToTree(root, value);
+        count++;
+        cout << value << endl;
+    }
+
+    if (count == 0)
+
+        return false;
+    
+    return true;
+}
+void Tree::add(int data)
+{
+    TreeNode* newNode = new TreeNode(data);
+
+    if (!root)
+    {
+        root = newNode;
+        return;
+    }
+
+    // Находим крайний правый узел
+    TreeNode* current = root;
+    while (current->right)
+        current = current->right;
+
+    current->right = newNode;
+}
+
+void Tree::depthFirstTraversal()
+{
+    if (!root)
+        return;
+
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            cout << marker->data << " ";
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+    cout << endl;
+}
+
+int Tree::findMinDFS()
+{
+    if (!root)
+        return 0;
+
+    int minv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data < minv)
+                minv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return minv;
+}
+
+int Tree::findMaxDFS()
+{
+    if (!root)
+        return 0;
+
+    int maxv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data > maxv)
+                maxv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return maxv;
+}
+
+bool Tree::isEmpty()
+{
+    return root == nullptr;
+}
+
+void Tree::printRightBranch()
+{
+    if (!root)
+        return;
+
+    TreeNode* current = root;
+
+    while (current)
+    {
+        cout << current->data;
+        if (current->right)
+            cout << " -> ";
+
+        current = current->right;
+    }
+    cout << endl;
+}
+
+#include "Tree.h"
+#include <fstream>
+#include <iostream>
+
+int main()
+{
+    Tree tree;
+
+    ifstream file("tree_data.txt");
+
+    if (tree.createFromFile(file))
+    {
+        tree.printRightBranch();
+        cout << "Min: " << tree.findMinDFS() << endl;
+        cout << "Max: " << tree.findMaxDFS() << endl;
+    }
+
+    file.close();
+
+    tree.add(100);
+    tree.printRightBranch();
+
+    cout << endl;
+
+    return 0;
+}
+ 
+#pragma once
+
+struct TreeNode;
+
+struct StackNode 
+{
+    TreeNode* data;  
+    StackNode* next;
+};
+
+class Stack
+{
+private:
+    StackNode* top;
+
+public:
+    Stack();
+    ~Stack();
+    void push(TreeNode* data);
+    TreeNode* pop();
+    TreeNode* peek();
+    bool isEmpty();
+};
+#include "Stack.h"
+#include "Tree.h"
+#include <iostream>
+
+Stack::Stack() : top(NULL) {}
+
+Stack::~Stack() 
+{
+    while (!isEmpty()) 
+        pop();
+}
+
+void Stack::push(TreeNode* data)
+{
+    StackNode* newNode = new StackNode;
+    newNode->data = data;
+    newNode->next = top;
+    top = newNode;
+}
+
+TreeNode* Stack::pop() 
+{
+    if (isEmpty())
+        return NULL;
+
+    StackNode* temp = top;
+    TreeNode* data = top->data;
+    top = top->next;
+    delete temp;
+    return data;
+}
+
+TreeNode* Stack::peek()
+{
+    if (isEmpty()) 
+        return NULL;
+    
+    return top->data;
+}
+
+bool Stack::isEmpty() 
+{
+    return top == NULL;
+}
+#pragma once
+#include "Stack.h"
+#include <string>
+using namespace std;
+
+struct TreeNode
+{
+    int data;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(int data) : data(data), left(nullptr), right(nullptr) {}
+};
+
+class Tree
+{
+private:
+    TreeNode* root;
+    void clear(TreeNode* node);
+
+public:
+    Tree();
+    ~Tree();
+
+    void add(int data);
+    bool isEmpty();
+    void printRightBranch();
+
+    void depthFirstTraversal();
+    int findMinDFS();
+    int findMaxDFS();
+
+    bool createFromFile(ifstream& f1);
+};
+#include "Tree.h"
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+Tree::Tree() : root(nullptr) {}
+
+Tree::~Tree()
+{
+    clear(root);
+}
+
+void Tree::clear(TreeNode* node)
+{
+    if (node)
+    {
+        clear(node->left);
+        clear(node->right);
+        delete node;
+    }
+}
+
+
+void addToTree(TreeNode*& node, int data)
+{
+    if (!node)
+    {
+        node = new TreeNode(data);
+        return;
+    }
+
+    if (data < node->data)
+        addToTree(node->left, data);
+    else 
+        addToTree(node->right, data);
+}
+
+bool Tree::createFromFile(ifstream& f1)
+{
+    if (!f1.is_open())
+        return false;
+
+    clear(root);
+    root = nullptr;
+
+    int value;
+    int count = 0;
+
+  
+    while (f1 >> value)
+    {
+        addToTree(root, value);
+        count++;
+        cout << value << endl;
+    }
+
+    if (count == 0)
+
+        return false;
+    
+    return true;
+}
+void Tree::add(int data)
+{
+    TreeNode* newNode = new TreeNode(data);
+
+    if (!root)
+    {
+        root = newNode;
+        return;
+    }
+
+    // Находим крайний правый узел
+    TreeNode* current = root;
+    while (current->right)
+        current = current->right;
+
+    current->right = newNode;
+}
+
+void Tree::depthFirstTraversal()
+{
+    if (!root)
+        return;
+
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            cout << marker->data << " ";
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+    cout << endl;
+}
+
+int Tree::findMinDFS()
+{
+    if (!root)
+        return 0;
+
+    int minv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data < minv)
+                minv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return minv;
+}
+
+int Tree::findMaxDFS()
+{
+    if (!root)
+        return 0;
+
+    int maxv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data > maxv)
+                maxv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return maxv;
+}
+
+bool Tree::isEmpty()
+{
+    return root == nullptr;
+}
+
+void Tree::printRightBranch()
+{
+    if (!root)
+        return;
+
+    TreeNode* current = root;
+
+    while (current)
+    {
+        cout << current->data;
+        if (current->right)
+            cout << " -> ";
+
+        current = current->right;
+    }
+    cout << endl;
+}
+
+#include "Tree.h"
+#include <fstream>
+#include <iostream>
+
+int main()
+{
+    Tree tree;
+
+    ifstream file("tree_data.txt");
+
+    if (tree.createFromFile(file))
+    {
+        tree.printRightBranch();
+        cout << "Min: " << tree.findMinDFS() << endl;
+        cout << "Max: " << tree.findMaxDFS() << endl;
+    }
+
+    file.close();
+
+    tree.add(100);
+    tree.printRightBranch();
+
+    cout << endl;
+
+    return 0;
+}
+ #pragma once
+
+struct TreeNode;
+
+struct StackNode 
+{
+    TreeNode* data;  
+    StackNode* next;
+};
+
+class Stack
+{
+private:
+    StackNode* top;
+
+public:
+    Stack();
+    ~Stack();
+    void push(TreeNode* data);
+    TreeNode* pop();
+    TreeNode* peek();
+    bool isEmpty();
+};
+#include "Stack.h"
+#include "Tree.h"
+#include <iostream>
+
+Stack::Stack() : top(NULL) {}
+
+Stack::~Stack() 
+{
+    while (!isEmpty()) 
+        pop();
+}
+
+void Stack::push(TreeNode* data)
+{
+    StackNode* newNode = new StackNode;
+    newNode->data = data;
+    newNode->next = top;
+    top = newNode;
+}
+
+TreeNode* Stack::pop() 
+{
+    if (isEmpty())
+        return NULL;
+
+    StackNode* temp = top;
+    TreeNode* data = top->data;
+    top = top->next;
+    delete temp;
+    return data;
+}
+
+TreeNode* Stack::peek()
+{
+    if (isEmpty()) 
+        return NULL;
+    
+    return top->data;
+}
+
+bool Stack::isEmpty() 
+{
+    return top == NULL;
+}
+#pragma once
+#include "Stack.h"
+#include <string>
+using namespace std;
+
+struct TreeNode
+{
+    int data;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(int data) : data(data), left(nullptr), right(nullptr) {}
+};
+
+class Tree
+{
+private:
+    TreeNode* root;
+    void clear(TreeNode* node);
+
+public:
+    Tree();
+    ~Tree();
+
+    void add(int data);
+    bool isEmpty();
+    void printRightBranch();
+
+    void depthFirstTraversal();
+    int findMinDFS();
+    int findMaxDFS();
+
+    bool createFromFile(ifstream& f1);
+};
+#include "Tree.h"
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+Tree::Tree() : root(nullptr) {}
+
+Tree::~Tree()
+{
+    clear(root);
+}
+
+void Tree::clear(TreeNode* node)
+{
+    if (node)
+    {
+        clear(node->left);
+        clear(node->right);
+        delete node;
+    }
+}
+
+
+void addToTree(TreeNode*& node, int data)
+{
+    if (!node)
+    {
+        node = new TreeNode(data);
+        return;
+    }
+
+    if (data < node->data)
+        addToTree(node->left, data);
+    else 
+        addToTree(node->right, data);
+}
+
+bool Tree::createFromFile(ifstream& f1)
+{
+    if (!f1.is_open())
+        return false;
+
+    clear(root);
+    root = nullptr;
+
+    int value;
+    int count = 0;
+
+  
+    while (f1 >> value)
+    {
+        addToTree(root, value);
+        count++;
+        cout << value << endl;
+    }
+
+    if (count == 0)
+
+        return false;
+    
+    return true;
+}
+void Tree::add(int data)
+{
+    TreeNode* newNode = new TreeNode(data);
+
+    if (!root)
+    {
+        root = newNode;
+        return;
+    }
+
+    // Находим крайний правый узел
+    TreeNode* current = root;
+    while (current->right)
+        current = current->right;
+
+    current->right = newNode;
+}
+
+void Tree::depthFirstTraversal()
+{
+    if (!root)
+        return;
+
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            cout << marker->data << " ";
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+    cout << endl;
+}
+
+int Tree::findMinDFS()
+{
+    if (!root)
+        return 0;
+
+    int minv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data < minv)
+                minv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return minv;
+}
+
+int Tree::findMaxDFS()
+{
+    if (!root)
+        return 0;
+
+    int maxv = root->data;
+    Stack stack;
+    TreeNode* marker = root;
+
+    stack.push(root);
+
+    while (!stack.isEmpty())
+    {
+        marker = stack.pop();
+
+        while (marker != NULL)
+        {
+            if (marker->data > maxv)
+                maxv = marker->data;
+
+            if (marker->right != NULL)
+                stack.push(marker->right);
+
+            marker = marker->left;
+        }
+    }
+
+    return maxv;
+}
+
+bool Tree::isEmpty()
+{
+    return root == nullptr;
+}
+
+void Tree::printRightBranch()
+{
+    if (!root)
+        return;
+
+    TreeNode* current = root;
+
+    while (current)
+    {
+        cout << current->data;
+        if (current->right)
+            cout << " -> ";
+
+        current = current->right;
+    }
+    cout << endl;
+}
+
+#include "Tree.h"
+#include <fstream>
+#include <iostream>
+
+int main()
+{
+    Tree tree;
+
+    ifstream file("tree_data.txt");
+
+    if (tree.createFromFile(file))
+    {
+        tree.printRightBranch();
+        cout << "Min: " << tree.findMinDFS() << endl;
+        cout << "Max: " << tree.findMaxDFS() << endl;
+    }
+
+    file.close();
+
+    tree.add(100);
+    tree.printRightBranch();
+
+    cout << endl;
+
+    return 0;
+}
+ 
+
+
+
+
